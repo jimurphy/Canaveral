@@ -12,12 +12,16 @@
 #define BSTEP 11
 #define BENABLE 9
 
+#define DIAGNOSTICLED 28
+
 volatile int panelAIsAtHome = 0;
 volatile int panelBIsAtHome = 0;
 
 String inString = "";
 boolean aMsg = false;
 boolean bMsg = false;
+boolean angleMsg = false;
+boolean speedMsg = false;
 
 enum tag_fsm { 
   _WAIT,
@@ -35,6 +39,14 @@ AccelStepper stepperB(AccelStepper::DRIVER,BSTEP,BDIRECTION);
 
 void setup(){
   Serial.begin(9600);
+  
+  pinMode(ADIRECTION, OUTPUT);
+  pinMode(ASTEP, OUTPUT);
+  pinMode(AENABLE, OUTPUT);
+  pinMode(BDIRECTION, OUTPUT);
+  pinMode(BSTEP, OUTPUT);
+  pinMode(BENABLE, OUTPUT);
+  pinMode(DIAGNOSTICLED, OUTPUT);
   
   stepperA.setEnablePin(AENABLE);
   stepperB.setEnablePin(BENABLE);
@@ -62,19 +74,16 @@ void fsm(){
 
     switch(readerFSM){
     case _WAIT:
-    Serial.println("WAIT");
     default:
       readerFSM = _1; 
     case _1:
       if(readByte == 'A'){
         aMsg = true;
         readerFSM = _2;
-        Serial.println("A message"); 
       }
       else if(readByte == 'B'){
         bMsg = true;
         readerFSM = _2;
-        Serial.println("B message");        
       }
       else{
         readerFSM = _WAIT;
@@ -82,12 +91,12 @@ void fsm(){
       break;
     case _2:
       if(readByte == 'X'){
+        speedMsg = true;
         readerFSM = _3;
-        Serial.println("Expecting steps from home"); 
       }
       else if(readByte == 'Y'){
+        angleMsg = true;
         readerFSM = _3;
-        Serial.println("Expecting speed"); 
       }      
       else{
         readerFSM = _WAIT;
@@ -98,18 +107,23 @@ void fsm(){
         inString += (char)inChar; 
       }
       else if(readByte == '\n'){
-        readerFSM = _WAIT;  
-        digitalWrite(13,HIGH);
-        delay(1000);
-        digitalWrite(13,LOW);
+        //if panel A
+        if(aMsg == true){
+          if(angleMsg == true){
+             //update panel angle target
+          }
+          else if(speedMsg == true){
+            //set destination really high, change speed
+          }
+        }
+        //if panel B
+        
+        readerFSM = _WAIT;
         readByte = 0;
         aMsg = false;
         bMsg = false;
-
-        Serial.println(inString.toInt());
-        Serial.print("String: ");
-        Serial.println(inString);
-        // clear the string for new input:
+        angleMsg = false;
+        speedMsg = false;
         inString = "";         
       }
       else{
