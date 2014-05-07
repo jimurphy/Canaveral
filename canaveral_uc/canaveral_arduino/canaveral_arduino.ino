@@ -17,11 +17,15 @@
 volatile int panelAIsAtHome = 0;
 volatile int panelBIsAtHome = 0;
 
+int stepperSpeed = 100;
+
 String inString = "";
 boolean aMsg = false;
 boolean bMsg = false;
 boolean angleMsg = false;
 boolean speedMsg = false;
+
+
 
 enum tag_fsm { 
   _WAIT,
@@ -65,6 +69,8 @@ void homeB(){
 
 void loop(){
   fsm();
+  stepperA.run();
+  stepperB.run();
 }
 
 void fsm(){
@@ -111,13 +117,30 @@ void fsm(){
         if(aMsg == true){
           if(angleMsg == true){
              //update panel angle target
+             stepperA.setMaxSpeed(stepperSpeed);
+             stepperA.moveTo(inString.toInt());
           }
           else if(speedMsg == true){
             //set destination really high, change speed
+            //TODO: Make move forward+backward
+            stepperA.setMaxSpeed(inString.toInt());
+            stepperA.moveTo(1000000);
           }
         }
         //if panel B
-        
+        if(bMsg == true){
+          if(angleMsg == true){
+             //update panel angle target
+             stepperB.setMaxSpeed(stepperSpeed);
+             stepperB.moveTo(inString.toInt());
+          }
+          else if(speedMsg == true){
+            //set destination really high, change speed
+            //TODO: Make move forward+backward
+            stepperB.setMaxSpeed(inString.toInt());
+            stepperB.moveTo(1000000);
+          }
+        }        
         readerFSM = _WAIT;
         readByte = 0;
         aMsg = false;
