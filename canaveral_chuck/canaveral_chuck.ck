@@ -3,6 +3,20 @@
 
 OscRecv recv;
 
+0 => int panelAMsg;
+0 => int angleAMsg;
+0 => int speedAMsg;
+
+0 => int panelBMsg;
+0 => int angleBMsg;
+0 => int speedBMsg;
+
+0 => int AXValue;
+0 => int BXValue;
+0 => int AYValue;
+0 => int BYValue;
+
+
 1337 => recv.port;
 
 recv.listen();
@@ -13,7 +27,7 @@ recv.event( "/panelOne/speed, f" ) @=> OscEvent panelonespeed;
 recv.event( "/panelTwo/speed, f" ) @=> OscEvent paneltwospeed;
 
 SerialIO.list() @=> string list[];
-
+0 => int serialValue;
 if(list.cap() == 0)
 {
     cherr <= "no serial devices available\n";
@@ -54,11 +68,13 @@ fun void panel1Angle(){
     while ( true )
     {
         paneloneangle => now;
-        //<<<oe.nextMsg()>>>;
-        while ( oe1.nextMsg() )
-        { 
-            paneloneangle.getFloat() => float test;
-            <<< "got (via OSC):", test >>>;
+        while (paneloneangle.nextMsg() )
+        {
+            true => panelAMsg;
+            true => angleAMsg; 
+            
+            paneloneangle.getFloat() $ int => AXValue;
+            <<< "AXValue (via OSC):", AXValue >>>;
         }
     }
 }
@@ -67,11 +83,13 @@ fun void panel2Angle(){
     while ( true )
     {
         paneltwoangle => now;
-        //<<<oe.nextMsg()>>>;
-        while ( paneltwoangle.nextMsg() )
-        { 
-            paneltwoangle.getFloat() => float test;
-            <<< "got (via OSC):", test >>>;
+        while (paneltwoangle.nextMsg() )
+        {
+            true => panelBMsg;
+            true => angleBMsg; 
+ 
+            paneltwoangle.getFloat() $ int => BXValue;
+            <<< "BXValue (via OSC):", BXValue >>>;
         }
     }
 }
@@ -80,12 +98,15 @@ fun void panel1Speed(){
     while ( true )
     {
         panelonespeed => now;
-        //<<<oe.nextMsg()>>>;
+        
         while ( panelonespeed.nextMsg() )
-        { 
-            panelonespeed.getFloat() => float test;
-            <<< "got (via OSC):", test >>>;
+        {
+            true => panelAMsg;
+            true => speedAMsg; 
+            panelonespeed.getFloat() $ int => AYValue;
+            <<< "AYValue (via OSC):", AYValue >>>;
         }
+       1::second => now;
     }
 }
 
@@ -96,8 +117,10 @@ fun void panel2Speed(){
         //<<<oe.nextMsg()>>>;
         while ( paneltwospeed.nextMsg() )
         { 
-            paneltwospeed.getFloat() => float test;
-            <<< "got (via OSC):", test >>>;
+            true => panelBMsg;
+            true => speedBMsg; 
+            paneltwospeed.getFloat() $ int => BYValue;
+            <<< "BYValue (via OSC):", BYValue >>>;
         }
     }
 }
@@ -105,9 +128,30 @@ fun void panel2Speed(){
 
 while(true)
 {
-    cereal <= "AX123\n";
-    chout <= "AX123\n";
-    
+    //if Panel A and Angle
+    if(panelAMsg == true && angleAMsg == true){
+        cereal <= "AX" <= AXValue <= "\n";
+        false => panelAMsg;
+        false => angleAMsg;
+    }
+    //if Panel A and Speed
+    if(panelAMsg == true && speedAMsg == true){
+        cereal <= "AY" <= AYValue <= "\n";
+        false => panelAMsg;
+        false => speedAMsg;     
+    }    
+    //if Panel B and Angle
+    if(panelBMsg == true && angleBMsg == true){
+        cereal <= "BX" <= BXValue <= "\n";
+        false => panelBMsg;
+        false => angleBMsg;             
+    }   
+    //if Panel B and Speed
+    if(panelBMsg == true && speedBMsg == true){
+        cereal <= "BY" <= BYValue <= "\n"; 
+        false => panelBMsg;
+        false => speedBMsg;                 
+    }      
     //This just dumps out what the arduino’s sending back.
     //just diagnostic - probably delete later or have as own shred
     for(0 => int i; i < 5; i++){
@@ -115,6 +159,5 @@ while(true)
         chout <= "=> " <= cereal.getLine() <= IO.nl();
         .1::second => now;
     }
-    
     1::second => now;
 }
