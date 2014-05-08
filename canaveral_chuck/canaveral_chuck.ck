@@ -3,13 +3,13 @@
 
 OscRecv recv;
 
-0 => int panelAMsg;
-0 => int angleAMsg;
-0 => int speedAMsg;
+false => int panelAMsg;
+false => int angleAMsg;
+false => int speedAMsg;
 
-0 => int panelBMsg;
-0 => int angleBMsg;
-0 => int speedBMsg;
+false => int panelBMsg;
+false => int angleBMsg;
+false => int speedBMsg;
 
 0 => int AXValue;
 0 => int BXValue;
@@ -63,15 +63,14 @@ spork ~ panel2Angle();
 spork ~ panel1Speed();
 spork ~ panel2Speed();
 
-
 fun void panel1Angle(){
     while ( true )
     {
         paneloneangle => now;
         while (paneloneangle.nextMsg() )
         {
-            true => panelAMsg;
-            true => angleAMsg; 
+            1 => panelAMsg;
+            1 => angleAMsg; 
             
             paneloneangle.getFloat() $ int => AXValue;
             <<< "AXValue (via OSC):", AXValue >>>;
@@ -106,7 +105,6 @@ fun void panel1Speed(){
             panelonespeed.getFloat() $ int => AYValue;
             <<< "AYValue (via OSC):", AYValue >>>;
         }
-       1::second => now;
     }
 }
 
@@ -129,35 +127,41 @@ fun void panel2Speed(){
 while(true)
 {
     //if Panel A and Angle
-    if(panelAMsg == true && angleAMsg == true){
+    if(panelAMsg == 1 && angleAMsg == 1){
         cereal <= "AX" <= AXValue <= "\n";
-        false => panelAMsg;
-        false => angleAMsg;
+        0 => panelAMsg;
+        0 => angleAMsg;
+        <<<"TEST">>>;
+        printStuff();
     }
     //if Panel A and Speed
-    if(panelAMsg == true && speedAMsg == true){
+    else if(panelAMsg == true && speedAMsg == true){
         cereal <= "AY" <= AYValue <= "\n";
         false => panelAMsg;
-        false => speedAMsg;     
+        false => speedAMsg;
+        printStuff();             
     }    
     //if Panel B and Angle
-    if(panelBMsg == true && angleBMsg == true){
+    else if(panelBMsg == true && angleBMsg == true){
         cereal <= "BX" <= BXValue <= "\n";
         false => panelBMsg;
-        false => angleBMsg;             
+        false => angleBMsg;
+        printStuff();                     
     }   
     //if Panel B and Speed
-    if(panelBMsg == true && speedBMsg == true){
+    else if(panelBMsg == true && speedBMsg == true){
         cereal <= "BY" <= BYValue <= "\n"; 
         false => panelBMsg;
-        false => speedBMsg;                 
+        false => speedBMsg;
+        printStuff();                         
     }      
-    //This just dumps out what the arduino’s sending back.
-    //just diagnostic - probably delete later or have as own shred
+    1::second => now;
+}
+
+fun void printStuff(){
     for(0 => int i; i < 5; i++){
         cereal.onLine() => now;
         chout <= "=> " <= cereal.getLine() <= IO.nl();
         .1::second => now;
     }
-    1::second => now;
 }
