@@ -25,8 +25,6 @@ boolean bMsg = false;
 boolean angleMsg = false;
 boolean speedMsg = false;
 
-
-
 enum tag_fsm { 
   _WAIT,
   _1,
@@ -57,6 +55,9 @@ void setup(){
   
   attachInterrupt(0, homeA, FALLING);
   attachInterrupt(1, homeB, FALLING);  
+  
+  panelAHome();
+  panelBHome();
 }
 
 void homeA(){
@@ -65,6 +66,22 @@ void homeA(){
 
 void homeB(){
   panelBIsAtHome = 1;
+}
+
+void panelAHome(){
+  stepperA.setSpeed(200);
+  while(panelAIsAtHome != 1){
+    stepperA.runSpeed();
+  }
+  stepperA.setCurrentPosition(0); //should also set speed to 0
+}
+
+void panelBHome(){
+  stepperB.setSpeed(200);  
+  while(panelBIsAtHome != 1){
+    stepperB.runSpeed();
+  }
+  stepperB.setCurrentPosition(0); //should also set speed to 0
 }
 
 void loop(){
