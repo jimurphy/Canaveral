@@ -1,6 +1,17 @@
 //OSC in from iPad (or other) - serial out to Arduino.
 //Runs in miniaudicle fine; intended for use in command line on RPi.
 
+OscRecv recv;
+
+1337 => recv.port;
+
+recv.listen();
+
+recv.event( "/panelOne/angle, f" ) @=> OscEvent paneloneangle;
+recv.event( "/panelTwo/angle, f" ) @=> OscEvent paneltwoangle;
+recv.event( "/panelOne/speed, f" ) @=> OscEvent panelonespeed;
+recv.event( "/panelTwo/speed, f" ) @=> OscEvent paneltwospeed;
+
 SerialIO.list() @=> string list[];
 
 if(list.cap() == 0)
@@ -32,6 +43,65 @@ if(!cereal.open(device, SerialIO.B9600, SerialIO.ASCII))
 }
 
 2::second => now;
+
+spork ~ panel1Angle();
+spork ~ panel2Angle();
+spork ~ panel1Speed();
+spork ~ panel2Speed();
+
+
+fun void panel1Angle(){
+    while ( true )
+    {
+        paneloneangle => now;
+        //<<<oe.nextMsg()>>>;
+        while ( oe1.nextMsg() )
+        { 
+            paneloneangle.getFloat() => float test;
+            <<< "got (via OSC):", test >>>;
+        }
+    }
+}
+
+fun void panel2Angle(){
+    while ( true )
+    {
+        paneltwoangle => now;
+        //<<<oe.nextMsg()>>>;
+        while ( paneltwoangle.nextMsg() )
+        { 
+            paneltwoangle.getFloat() => float test;
+            <<< "got (via OSC):", test >>>;
+        }
+    }
+}
+
+fun void panel1Speed(){
+    while ( true )
+    {
+        panelonespeed => now;
+        //<<<oe.nextMsg()>>>;
+        while ( panelonespeed.nextMsg() )
+        { 
+            panelonespeed.getFloat() => float test;
+            <<< "got (via OSC):", test >>>;
+        }
+    }
+}
+
+fun void panel2Speed(){
+    while ( true )
+    {
+        paneltwospeed => now;
+        //<<<oe.nextMsg()>>>;
+        while ( paneltwospeed.nextMsg() )
+        { 
+            paneltwospeed.getFloat() => float test;
+            <<< "got (via OSC):", test >>>;
+        }
+    }
+}
+
 
 while(true)
 {
