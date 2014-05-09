@@ -72,8 +72,10 @@ fun void panel1Angle(){
             1 => panelAMsg;
             1 => angleAMsg; 
             
-            paneloneangle.getFloat() $ int => AXValue;
-            <<< "AXValue (via OSC):", AXValue >>>;
+            paneloneangle.getFloat() => float mapValue;
+            <<< "AXValue (via OSC):", mapValue >>>;
+            map(mapValue, -360, 360, 0, stepperRev);
+            mapValue $ int => AXValue;
         }
     }
 }
@@ -87,8 +89,10 @@ fun void panel2Angle(){
             true => panelBMsg;
             true => angleBMsg; 
  
-            paneltwoangle.getFloat() $ int => BXValue;
-            <<< "BXValue (via OSC):", BXValue >>>;
+            paneltwoangle.getFloat() => float mapValue;
+            <<< "BXValue (via OSC):", mapValue >>>;
+            map(mapValue, -360, 360, 0, stepperRev);
+            mapValue $ int => BXValue;
         }
     }
 }
@@ -165,3 +169,8 @@ fun void printStuff(){
         .1::second => now;
     }
 }
+
+fun float map(float x, float in_min, float in_max, float out_min, float out_max){
+    return(x-in_min)*(out_max-out_min) / (in_max-in_min)+out_min;
+}
+
