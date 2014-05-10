@@ -73,6 +73,7 @@ void panelAHome(){
   while(panelAIsAtHome != 1){
     stepperA.runSpeed();
   }
+  panelAIsAtHome = 0;
   stepperA.setCurrentPosition(0); //should also set speed to 0
 }
 
@@ -81,6 +82,7 @@ void panelBHome(){
   while(panelBIsAtHome != 1){
     stepperB.runSpeed();
   }
+  panelBIsAtHome = 0;
   stepperB.setCurrentPosition(0); //should also set speed to 0
 }
 
