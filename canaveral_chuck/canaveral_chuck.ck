@@ -16,6 +16,7 @@ false => int speedBMsg;
 0 => int AYValue;
 0 => int BYValue;
 
+500 => stepperrev; //number of steps per revolution
 
 1337 => recv.port;
 

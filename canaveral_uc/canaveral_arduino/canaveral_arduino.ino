@@ -1,3 +1,9 @@
+//Canaveral Arduino Code
+//Reads messages in from ChucK Canaveral program.
+//Message structure: A X n n n \n (A panel, Speed message, speed = nnn)
+//Another message example: B Y n n n n \n (B panel, Angle message, Move to pos nnnn)
+//jimwmurphy.com
+
 #include <AccelStepper.h>
 #include <avr/io.h>
 
@@ -56,8 +62,10 @@ void setup(){
   attachInterrupt(0, homeA, FALLING);
   attachInterrupt(1, homeB, FALLING);  
   
+  digitalWrite(DIAGNOSTICLED, HIGH);
   panelAHome();
   panelBHome();
+  digitalWrite(DIAGNOSTICLED, LOW);  
 }
 
 void homeA(){
@@ -74,7 +82,7 @@ void panelAHome(){
     stepperA.runSpeed();
   }
   panelAIsAtHome = 0;
-  stepperA.setCurrentPosition(0); //should also set speed to 0
+  stepperA.setCurrentPosition(0); //this also sets speed to 0
 }
 
 void panelBHome(){
@@ -83,7 +91,7 @@ void panelBHome(){
     stepperB.runSpeed();
   }
   panelBIsAtHome = 0;
-  stepperB.setCurrentPosition(0); //should also set speed to 0
+  stepperB.setCurrentPosition(0); //this also sets speed to 0
 }
 
 void loop(){
