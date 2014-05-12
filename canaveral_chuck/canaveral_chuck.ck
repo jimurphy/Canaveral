@@ -16,7 +16,7 @@ false => int speedBMsg;
 0 => int AYValue;
 0 => int BYValue;
 
-500 => stepperrev; //number of steps per revolution
+500 => int stepperRev; //number of steps per revolution
 
 1337 => recv.port;
 
@@ -107,7 +107,9 @@ fun void panel1Speed(){
         {
             true => panelAMsg;
             true => speedAMsg; 
-            panelonespeed.getFloat() $ int => AYValue;
+            panelonespeed.getFloat() => float mapValue;
+            map(mapValue, -100, 100, 0, 200);
+            mapValue $ int => AYValue;
             <<< "AYValue (via OSC):", AYValue >>>;
         }
     }
@@ -122,7 +124,9 @@ fun void panel2Speed(){
         { 
             true => panelBMsg;
             true => speedBMsg; 
-            paneltwospeed.getFloat() $ int => BYValue;
+            paneltwospeed.getFloat() => float mapValue;
+            map(mapValue, -100, 100, 0, 200);
+            mapValue $ int => BYValue;            
             <<< "BYValue (via OSC):", BYValue >>>;
         }
     }

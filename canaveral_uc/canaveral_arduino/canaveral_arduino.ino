@@ -24,6 +24,7 @@ volatile int panelAIsAtHome = 0;
 volatile int panelBIsAtHome = 0;
 
 int stepperSpeed = 100;
+int maxStepperSpeed = 200;
 
 String inString = "";
 boolean aMsg = false;
@@ -149,8 +150,15 @@ void fsm(){
           }
           else if(speedMsg == true){
             //set destination really high, change speed
-            //TODO: Make move forward+backward
-            stepperA.setMaxSpeed(inString.toInt());
+            int aSpeed = inString.toInt();
+            if(aSpeed > 100){
+              map(aSpeed, 100, 200, 0, maxStepperSpeed); 
+              stepperA.setMaxSpeed(aSpeed);              
+            }
+            else if(aSpeed < 100){
+              map(aSpeed, 0, 100, -maxStepperSpeed, 0);
+              stepperA.setMaxSpeed(aSpeed);                            
+            }
             stepperA.moveTo(1000000);
           }
         }
@@ -163,8 +171,15 @@ void fsm(){
           }
           else if(speedMsg == true){
             //set destination really high, change speed
-            //TODO: Make move forward+backward
-            stepperB.setMaxSpeed(inString.toInt());
+            int bSpeed = inString.toInt();
+            if(bSpeed > 100){
+              map(bSpeed, 100, 200, 0, maxStepperSpeed); 
+              stepperB.setMaxSpeed(bSpeed);              
+            }
+            else if(bSpeed < 100){
+              map(bSpeed, 0, 100, -maxStepperSpeed, 0);
+              stepperB.setMaxSpeed(bSpeed);                            
+            }
             stepperB.moveTo(1000000);
           }
         }        
