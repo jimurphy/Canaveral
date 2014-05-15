@@ -119,7 +119,7 @@ fun void panel2Speed(){
     while ( true )
     {
         paneltwospeed => now;
-        //<<<oe.nextMsg()>>>;
+
         while ( paneltwospeed.nextMsg() )
         { 
             true => panelBMsg;
