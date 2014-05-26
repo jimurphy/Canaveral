@@ -1,5 +1,7 @@
 //Canaveral Arduino Code
 //Reads messages in from ChucK Canaveral program.
+//Intended to be used with an Arduino Mega or Mega 2560. 
+//If used with a Due, check level shifting on pins
 //Message structure: A X n n n \n (A panel, Speed message, speed = nnn)
 //Another message example: B Y n n n n \n (B panel, Angle message, Move to pos nnnn)
 //jimwmurphy.com
@@ -64,8 +66,13 @@ void setup(){
   attachInterrupt(1, homeB, FALLING);  
   
   digitalWrite(DIAGNOSTICLED, HIGH);
-  panelAHome();
-  panelBHome();
+  //panelAHome();
+  //panelBHome();
+  stepperA.setCurrentPosition(0); //this also sets speed to 0
+  stepperB.setCurrentPosition(0); //this also sets speed to 0 
+  panelAIsAtHome = 1;
+  panelBIsAtHome = 1;  
+  delay(1000);
   digitalWrite(DIAGNOSTICLED, LOW);  
 }
 
@@ -125,11 +132,14 @@ void fsm(){
       break;
     case _2:
       if(readByte == 'X'){
-        speedMsg = true;
+        angleMsg = true;
         readerFSM = _3;
       }
       else if(readByte == 'Y'){
-        angleMsg = true;
+        speedMsg = true;
+        digitalWrite(DIAGNOSTICLED, HIGH);  
+        delay(300);
+        digitalWrite(DIAGNOSTICLED, LOW);      
         readerFSM = _3;
       }      
       else{
@@ -153,13 +163,14 @@ void fsm(){
             int aSpeed = inString.toInt();
             if(aSpeed > 100){
               map(aSpeed, 100, 200, 0, maxStepperSpeed); 
-              stepperA.setMaxSpeed(aSpeed);              
+              stepperA.setMaxSpeed(aSpeed);   
+              stepperA.moveTo(1000000);              
             }
             else if(aSpeed < 100){
               map(aSpeed, 0, 100, -maxStepperSpeed, 0);
-              stepperA.setMaxSpeed(aSpeed);                            
+              stepperA.setMaxSpeed(aSpeed);
+              stepperA.moveTo(-1000000);              
             }
-            stepperA.moveTo(1000000);
           }
         }
         //if panel B
@@ -174,13 +185,14 @@ void fsm(){
             int bSpeed = inString.toInt();
             if(bSpeed > 100){
               map(bSpeed, 100, 200, 0, maxStepperSpeed); 
-              stepperB.setMaxSpeed(bSpeed);              
+              stepperB.setMaxSpeed(bSpeed);
+              stepperB.moveTo(1000000);              
             }
             else if(bSpeed < 100){
               map(bSpeed, 0, 100, -maxStepperSpeed, 0);
-              stepperB.setMaxSpeed(bSpeed);                            
+              stepperB.setMaxSpeed(bSpeed);
+              stepperB.moveTo(-1000000);              
             }
-            stepperB.moveTo(1000000);
           }
         }        
         readerFSM = _WAIT;

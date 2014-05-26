@@ -41,7 +41,7 @@ for(int i; i < list.cap(); i++)
     chout <= i <= ": " <= list[i] <= IO.newline();
 }
 
-2 => int device;
+0 => int device;
 if(me.args()) me.arg(0) => Std.atoi => device;
 
 if(device >= list.cap())
@@ -75,8 +75,7 @@ fun void panel1Angle(){
             
             paneloneangle.getFloat() => float mapValue;
             <<< "AXValue (via OSC):", mapValue >>>;
-            map(mapValue, -360, 360, 0, stepperRev);
-            mapValue $ int => AXValue;
+            map(mapValue, 0, 360, 0, stepperRev) $ int => AXValue;
         }
     }
 }
@@ -92,8 +91,7 @@ fun void panel2Angle(){
  
             paneltwoangle.getFloat() => float mapValue;
             <<< "BXValue (via OSC):", mapValue >>>;
-            map(mapValue, -360, 360, 0, stepperRev);
-            mapValue $ int => BXValue;
+            map(mapValue, 0, 360, 0, stepperRev) $ int => BXValue;
         }
     }
 }
@@ -108,8 +106,7 @@ fun void panel1Speed(){
             true => panelAMsg;
             true => speedAMsg; 
             panelonespeed.getFloat() => float mapValue;
-            map(mapValue, -100, 100, 0, 200);
-            mapValue $ int => AYValue;
+            map(mapValue, -100, 100, 0, 200) $ int => AYValue;
             <<< "AYValue (via OSC):", AYValue >>>;
         }
     }
@@ -125,8 +122,7 @@ fun void panel2Speed(){
             true => panelBMsg;
             true => speedBMsg; 
             paneltwospeed.getFloat() => float mapValue;
-            map(mapValue, -100, 100, 0, 200);
-            mapValue $ int => BYValue;            
+            map(mapValue, -100, 100, 0, 200) $ int => BYValue;
             <<< "BYValue (via OSC):", BYValue >>>;
         }
     }
@@ -137,32 +133,32 @@ while(true)
 {
     //if Panel A and Angle
     if(panelAMsg == 1 && angleAMsg == 1){
+        <<<"TEST">>>;
         cereal <= "AX" <= AXValue <= "\n";
         0 => panelAMsg;
         0 => angleAMsg;
-        <<<"TEST">>>;
-        printStuff();
+        //printStuff();
     }
     //if Panel A and Speed
     else if(panelAMsg == true && speedAMsg == true){
         cereal <= "AY" <= AYValue <= "\n";
         false => panelAMsg;
         false => speedAMsg;
-        printStuff();             
+        //printStuff();             
     }    
     //if Panel B and Angle
     else if(panelBMsg == true && angleBMsg == true){
         cereal <= "BX" <= BXValue <= "\n";
         false => panelBMsg;
         false => angleBMsg;
-        printStuff();                     
+        //printStuff();                     
     }   
     //if Panel B and Speed
     else if(panelBMsg == true && speedBMsg == true){
         cereal <= "BY" <= BYValue <= "\n"; 
         false => panelBMsg;
         false => speedBMsg;
-        printStuff();                         
+        //printStuff();                         
     }      
     1::second => now;
 }
@@ -176,6 +172,6 @@ fun void printStuff(){
 }
 
 fun float map(float x, float in_min, float in_max, float out_min, float out_max){
-    return(x-in_min)*(out_max-out_min) / (in_max-in_min)+out_min;
+    return((x-in_min)*(out_max-out_min))/((in_max-in_min)+out_min);
 }
 
