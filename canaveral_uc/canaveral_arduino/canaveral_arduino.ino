@@ -28,6 +28,10 @@ volatile int panelBIsAtHome = 0;
 int stepperSpeed = 100;
 int maxStepperSpeed = 200;
 
+int stepsPerRevolution = 1000;
+int currentAngleA = 0;
+int currentAngleB = 0;
+
 String inString = "";
 boolean aMsg = false;
 boolean bMsg = false;
@@ -50,7 +54,7 @@ AccelStepper stepperB(AccelStepper::DRIVER,BSTEP,BDIRECTION);
 
 void setup(){
   Serial.begin(9600);
-  
+
   pinMode(ADIRECTION, OUTPUT);
   pinMode(ASTEP, OUTPUT);
   pinMode(AENABLE, OUTPUT);
@@ -58,13 +62,13 @@ void setup(){
   pinMode(BSTEP, OUTPUT);
   pinMode(BENABLE, OUTPUT);
   pinMode(DIAGNOSTICLED, OUTPUT);
-  
+
   stepperA.setEnablePin(AENABLE);
   stepperB.setEnablePin(BENABLE);
-  
+
   attachInterrupt(0, homeA, FALLING);
   attachInterrupt(1, homeB, FALLING);  
-  
+
   digitalWrite(DIAGNOSTICLED, HIGH);
   //panelAHome();
   //panelBHome();
@@ -104,8 +108,14 @@ void panelBHome(){
 
 void loop(){
   fsm();
+
   stepperA.run();
   stepperB.run();
+
+  currentAngleA = stepperA.currentPosition()%stepsPerRevolution;
+  currentAngleB = stepperB.currentPosition()%stepsPerRevolution;
+
+  stepperB.currentPosition();
 }
 
 void fsm(){
@@ -145,7 +155,7 @@ void fsm(){
       else{
         readerFSM = _WAIT;
       }
-    break;  
+      break;  
     case _3:
       if (isDigit(inChar)) {
         inString += (char)inChar; 
@@ -154,9 +164,12 @@ void fsm(){
         //if panel A
         if(aMsg == true){
           if(angleMsg == true){
-             //update panel angle target
-             stepperA.setMaxSpeed(stepperSpeed);
-             stepperA.moveTo(inString.toInt());
+            //set position to angle relative to 0 (good if pos. was high from speedrun)
+            stepperA.setCurrentPosition(currentAngleA); //this also sets speed to 0 
+
+            //update panel angle target
+            stepperA.setMaxSpeed(stepperSpeed);
+            stepperA.moveTo(inString.toInt());
           }
           else if(speedMsg == true){
             //set destination really high, change speed
@@ -176,9 +189,11 @@ void fsm(){
         //if panel B
         if(bMsg == true){
           if(angleMsg == true){
-             //update panel angle target
-             stepperB.setMaxSpeed(stepperSpeed);
-             stepperB.moveTo(inString.toInt());
+            //set position to angle relative to 0 (good if pos. was high from speedrun)            
+            stepperB.setCurrentPosition(currentAngleB); //this also sets speed to 0             
+            //update panel angle target
+            stepperB.setMaxSpeed(stepperSpeed);
+            stepperB.moveTo(inString.toInt());
           }
           else if(speedMsg == true){
             //set destination really high, change speed
@@ -206,7 +221,8 @@ void fsm(){
       else{
         readerFSM = _WAIT;  
       }
-     break; 
+      break; 
     }
   }
 }
+
