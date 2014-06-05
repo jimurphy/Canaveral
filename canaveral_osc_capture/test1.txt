@@ -1,1 +1,0 @@
-if(s.freq < 500){	0.1 => s.gain;}else{	0.9 => s.gain}
