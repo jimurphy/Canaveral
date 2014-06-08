@@ -61,15 +61,16 @@ while(i < 1000){
     writeOscValues(panel2AngleValue, i);
     writeOscValues(panel1SpeedValue, i);
     writeOscValues(panel2SpeedValue, i);
-    .1::second => now;    
+    1::second => now;
+    i++;
 }
 
-fun void writeOscValues(float angle, int value){
-    if(!file.open(me.dir()+"/test1.txt", FileIO.APPEND)){
+fun void writeOscValues(float value, int count){
+    if(!file.open(me.dir()+"/osc_capture.txt", FileIO.APPEND)){
         <<<"ERROR. CAN NOT OPEN FILE!">>>;
         return;
     }
     //open file
-    file <= "angleA" <= value <= "," <= angle <= IO.newline();
+    file <= value <= ", " <= count <= IO.newline();
     file.close();
 }
