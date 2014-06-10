@@ -25,10 +25,10 @@
 volatile int panelAIsAtHome = 0;
 volatile int panelBIsAtHome = 0;
 
-int stepperSpeed = 100;
-int maxStepperSpeed = 200;
+int stepperSpeed = 5000;
+int maxStepperSpeed = 5000;
 
-int stepsPerRevolution = 1000;
+int stepsPerRevolution = 10000;
 int currentAngleA = 0;
 int currentAngleB = 0;
 
@@ -73,7 +73,8 @@ void setup(){
   //panelAHome();
   //panelBHome();
   stepperA.setCurrentPosition(0); //this also sets speed to 0
-  stepperB.setCurrentPosition(0); //this also sets speed to 0 
+  stepperB.setCurrentPosition(0); //this also sets speed to 0
+  stepperA.setAcceleration(100); 
   panelAIsAtHome = 1;
   panelBIsAtHome = 1;  
   delay(1000);
@@ -169,7 +170,7 @@ void fsm(){
 
             //update panel angle target
             stepperA.setMaxSpeed(stepperSpeed);
-            stepperA.moveTo(inString.toInt());
+            stepperA.moveTo(map(inString.toInt(), -180, 180, -1*(stepsPerRevolution/2), stepsPerRevolution/2));
           }
           else if(speedMsg == true){
             //set destination really high, change speed

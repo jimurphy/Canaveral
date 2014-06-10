@@ -41,7 +41,7 @@ for(int i; i < list.cap(); i++)
     chout <= i <= ": " <= list[i] <= IO.newline();
 }
 
-0 => int device;
+2 => int device;
 if(me.args()) me.arg(0) => Std.atoi => device;
 
 if(device >= list.cap())
