@@ -10,7 +10,7 @@
 #include <avr/io.h>
 
 //Panel A and B pins
-#define ALIMITSWITCH 2
+#define ALIMITSWITCH 1
 #define ADIRECTION 7
 #define ASTEP 5
 #define AENABLE 4
@@ -53,7 +53,9 @@ AccelStepper stepperA(AccelStepper::DRIVER,ASTEP,ADIRECTION);
 AccelStepper stepperB(AccelStepper::DRIVER,BSTEP,BDIRECTION);
 
 void setup(){
-  Serial.begin(9600);
+  
+  pinMode(ALIMITSWITCH, INPUT);
+  pinMode(BLIMITSWITCH, INPUT);  
 
   pinMode(ADIRECTION, OUTPUT);
   pinMode(ASTEP, OUTPUT);
@@ -63,26 +65,37 @@ void setup(){
   pinMode(BENABLE, OUTPUT);
   pinMode(DIAGNOSTICLED, OUTPUT);
 
+  //attachInterrupt(0, homeA, LOW);
+  //attachInterrupt(1, homeB, FALLING);
+  stepperA.setCurrentPosition(1);    
+  panelAHome();
+
   stepperA.setEnablePin(AENABLE);
-  stepperB.setEnablePin(BENABLE);
+  stepperB.setEnablePin(BENABLE); 
+  stepperA.setCurrentPosition(1);  
 
-  attachInterrupt(0, homeA, FALLING);
-  attachInterrupt(1, homeB, FALLING);  
+  stepperA.setAcceleration(100);   
+  stepperA.setMaxSpeed(3000);
 
-  digitalWrite(DIAGNOSTICLED, HIGH);
-  //panelAHome();
   //panelBHome();
-  stepperA.setCurrentPosition(0); //this also sets speed to 0
-  stepperB.setCurrentPosition(0); //this also sets speed to 0
-  stepperA.setAcceleration(100); 
-  panelAIsAtHome = 1;
-  panelBIsAtHome = 1;  
+
   delay(1000);
-  digitalWrite(DIAGNOSTICLED, LOW);  
+
+  Serial.begin(9600);  
 }
 
 void homeA(){
+  stepperA.setCurrentPosition(0);    
   panelAIsAtHome = 1;
+}
+
+void blink10(){
+  for(int i = 0; i < 11; i++){
+  digitalWrite(DIAGNOSTICLED, HIGH);  
+  delay(50);
+  digitalWrite(DIAGNOSTICLED, LOW);  
+  delay(50);  
+  }
 }
 
 void homeB(){
@@ -90,11 +103,15 @@ void homeB(){
 }
 
 void panelAHome(){
-  stepperA.setSpeed(200);
-  while(panelAIsAtHome != 1){
-    stepperA.runSpeed();
+  digitalWrite(AENABLE, HIGH);
+  while(digitalRead(ALIMITSWITCH) != 0){
+     digitalWrite(ASTEP, LOW);
+     delayMicroseconds(2000);
+     digitalWrite(ASTEP, HIGH);
+     delayMicroseconds(2000);
   }
-  panelAIsAtHome = 0;
+  digitalWrite(AENABLE, LOW);  
+  blink10();  
   stepperA.setCurrentPosition(0); //this also sets speed to 0
 }
 
@@ -124,7 +141,9 @@ void fsm(){
     inChar = Serial.read();
     readByte = (char)inChar;
 
+    //this switch parses incoming serial and decides which panel it's for.
     switch(readerFSM){
+      
     case _WAIT:
     default:
       readerFSM = _1; 
@@ -148,9 +167,9 @@ void fsm(){
       }
       else if(readByte == 'Y'){
         speedMsg = true;
-        digitalWrite(DIAGNOSTICLED, HIGH);  
+        //digitalWrite(DIAGNOSTICLED, HIGH);  
         delay(300);
-        digitalWrite(DIAGNOSTICLED, LOW);      
+        //digitalWrite(DIAGNOSTICLED, LOW);      
         readerFSM = _3;
       }      
       else{
